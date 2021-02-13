@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9Arm Bot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        #alert_container{
+            text-align: center;
+            margin-top: 10%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="alert_container">
+            
+        </div>
+    </div>
+</body>
+<script>
+    const socket = io()
+    var app = new Vue({
+        el: '#app',
+        data: {
+            data: JSON.parse('<%-data%>')
+        },
+        methods: {
+
+        },
+        created: function () {
+            console.log(this.$root)
+            document.body.style.backgroundColor = "<%=background_color%>"
+            socket.on('alert', async (data) => {
+                console.log(data)
+                let box_alert = document.createElement('div')
+                box_alert.className = `${data.animate}`
+                box_alert.innerHTML = `<img src="${data.image_src}" style="max-width: 100%;">`
+                document.getElementById('alert_container').append(box_alert)
+                let audio = null
+                if(data.sound_src){
+                    audio = document.createElement('audio')
+                    audio.style.display = "none"
+                    audio.src = data.sound_src
+                    audio.volume = data.volume;
+                    await audio.play()
+                }
+                setTimeout(()=>{
+                    box_alert.remove()
+                    if(audio){
+                        audio.remove()
+                    }
+                },data.alert_timeout)
+            })
+        }
+    })
+</script>
+
+</html>
